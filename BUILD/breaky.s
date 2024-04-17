@@ -24,10 +24,12 @@
 	.import		_vram_put
 	.import		_vram_unrle
 	.import		_memcpy
+	.import		_delay
 	.import		_set_vram_buffer
 	.import		_one_vram_buffer
 	.import		_get_pad_new
 	.import		_check_collision
+	.import		_pal_fade_to
 	.import		_set_scroll_y
 	.import		_get_ppu_addr
 	.export		_PaddleSpr
@@ -51,6 +53,8 @@
 	.export		_c_map
 	.export		_Paddle
 	.export		_Ball
+	.export		_i
+	.export		_text
 	.export		_palette_bg
 	.export		_palette_sp
 	.export		_draw_bg
@@ -75,6 +79,8 @@ _Ball:
 	.byte	$FF
 	.byte	$05
 	.byte	$05
+_i:
+	.byte	$00
 
 .segment	"RODATA"
 
@@ -583,6 +589,8 @@ _c1:
 	.byte	$00
 	.byte	$00
 	.byte	$00
+_text:
+	.byte	$46,$69,$72,$73,$74,$20,$4C,$65,$76,$65,$6C,$00
 _palette_bg:
 	.byte	$0F
 	.byte	$00
@@ -662,6 +670,52 @@ _c_map:
 .segment	"CODE"
 
 ;
+; ppu_off(); // Screen off
+;
+	jsr     _ppu_off
+;
+; vram_adr(NTADR_A(10,14)); // Screen is 32 x 30 tiles
+;
+	ldx     #$21
+	lda     #$CA
+	jsr     _vram_adr
+;
+; while(text[i]){
+;
+	jmp     L0004
+;
+; vram_put(text[i]); // This pushes 1 char to the screen
+;
+L0002:	ldy     _i
+	lda     _text,y
+	jsr     _vram_put
+;
+; ++i;
+;
+	inc     _i
+;
+; while(text[i]){
+;
+L0004:	ldy     _i
+	lda     _text,y
+	bne     L0002
+;
+; ppu_on_all(); // Turn on screen
+;
+	jsr     _ppu_on_all
+;
+; delay(100); // Wait 100 frames
+;
+	lda     #$64
+	jsr     _delay
+;
+; pal_fade_to(0,4); // Fade in to normal
+;
+	lda     #$00
+	jsr     pusha
+	lda     #$04
+	jsr     _pal_fade_to
+;
 ; ppu_off(); // screen off
 ;
 	jsr     _ppu_off
@@ -681,10 +735,10 @@ _c_map:
 ; memcpy (c_map, c1, 256);
 ;
 	ldy     #$00
-L0002:	lda     _c1,y
+L0007:	lda     _c1,y
 	sta     _c_map,y
 	iny
-	bne     L0002
+	bne     L0007
 ;
 ; vram_adr(NTADR_A(0,6));
 ;
@@ -696,17 +750,17 @@ L0002:	lda     _c1,y
 ;
 	lda     #$00
 	sta     _temp_y
-L0014:	lda     _temp_y
+L0019:	lda     _temp_y
 	cmp     #$10
-	bcs     L0004
+	bcs     L0009
 ;
 ; for(temp_x = 0; temp_x < 16; ++temp_x){
 ;
 	lda     #$00
 	sta     _temp_x
-L0015:	lda     _temp_x
+L001A:	lda     _temp_x
 	cmp     #$10
-	bcs     L0019
+	bcs     L001E
 ;
 ; temp1 = (temp_y << 4) + temp_x;
 ;
@@ -722,13 +776,13 @@ L0015:	lda     _temp_x
 ; if((temp_x == 0) || (temp_x == 15)) {
 ;
 	lda     _temp_x
-	beq     L0016
+	beq     L001B
 	cmp     #$0F
-	bne     L000B
+	bne     L0010
 ;
 ; vram_put(0x10); // wall at the edges
 ;
-L0016:	lda     #$10
+L001B:	lda     #$10
 	jsr     _vram_put
 ;
 ; vram_put(0x10);
@@ -737,13 +791,13 @@ L0016:	lda     #$10
 ;
 ; else {
 ;
-	jmp     L0013
+	jmp     L0018
 ;
 ; if(c_map[temp1]){ // if block = yes
 ;
-L000B:	ldy     _temp1
+L0010:	ldy     _temp1
 	lda     _c_map,y
-	beq     L0018
+	beq     L001D
 ;
 ; vram_put(0x11); // draw block
 ;
@@ -756,30 +810,30 @@ L000B:	ldy     _temp1
 ;
 ; else{
 ;
-	jmp     L0013
+	jmp     L0018
 ;
 ; vram_put(0); // else draw blank
 ;
-L0018:	jsr     _vram_put
+L001D:	jsr     _vram_put
 ;
 ; vram_put(0);
 ;
 	lda     #$00
-L0013:	jsr     _vram_put
+L0018:	jsr     _vram_put
 ;
 ; for(temp_x = 0; temp_x < 16; ++temp_x){
 ;
 	inc     _temp_x
-	jmp     L0015
+	jmp     L001A
 ;
 ; for(temp_y = 0; temp_y < 16; ++temp_y){
 ;
-L0019:	inc     _temp_y
-	jmp     L0014
+L001E:	inc     _temp_y
+	jmp     L0019
 ;
 ; ppu_on_all();
 ;
-L0004:	jmp     _ppu_on_all
+L0009:	jmp     _ppu_on_all
 
 .endproc
 

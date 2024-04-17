@@ -4,16 +4,12 @@
  *	Doug Fraker 2018
  */	
  
-
-
 #include "LIB/neslib.h"
 #include "LIB/nesdoug.h"
 #include "Sprites.h" // holds our metasprite data
 #include "breaky.h"
 
 
-	
-	
 void main (void) {
 	
 	ppu_off(); // screen off
@@ -35,7 +31,7 @@ void main (void) {
 	// turn on screen
 	// ppu_on_all(); // already done in draw_bg()
 
-	
+	//------------------------------------------------------------------------------------// Game Loop
 	while (1){
 		// infinite loop
 		ppu_wait_nmi(); // wait till beginning of the frame
@@ -55,11 +51,23 @@ void main (void) {
 	}
 }
 
-
-
 void draw_bg(void){
+	//------------------------------------------------------------------------------------// Game Name
+	ppu_off(); // Screen off
+	vram_adr(NTADR_A(10,14)); // Screen is 32 x 30 tiles
+	
+	while(text[i]){
+		vram_put(text[i]); // This pushes 1 char to the screen
+		++i;
+	}	
+	
+	ppu_on_all(); // Turn on screen
+	
+	delay(100); // Wait 100 frames
+	pal_fade_to(0,4); // Fade in to normal
+	
+	//------------------------------------------------------------------------------------// Game Background
 	ppu_off(); // screen off
-
 	vram_adr(NAMETABLE_A);
 	// this sets a start position on the BG, top left of screen
 	
@@ -70,7 +78,7 @@ void draw_bg(void){
 	// copy the collision map to c_map
 	
 	vram_adr(NTADR_A(0,6));
-	// sets a start address, skipping the top of the screen
+	//sets a start address, skipping the top of the screen
 	
 	for(temp_y = 0; temp_y < 16; ++temp_y){
 		for(temp_x = 0; temp_x < 16; ++temp_x){
@@ -95,9 +103,8 @@ void draw_bg(void){
 	ppu_on_all();
 }
 
-
-
 void draw_sprites(void){
+	//------------------------------------------------------------------------------------// Draw Sprites
 	// clear all sprites from sprite buffer
 	oam_clear();
 	
@@ -106,9 +113,8 @@ void draw_sprites(void){
 	oam_meta_spr(Ball.X, Ball.Y, BallSpr);
 }
 	
-	
-	
 void movement(void){
+	//------------------------------------------------------------------------------------// Movement
 	// paddle move
 	if(pad1 & PAD_LEFT){
 		Paddle.X -= 2;
@@ -120,9 +126,6 @@ void movement(void){
 		if(Paddle.X > PADDLE_MAX) Paddle.X = PADDLE_MAX;
 
 	}
-	
-
-	
 	
 	if(ball_state == BALL_OFF){ // ball is inactive, wait a second
 		++ball_count;
@@ -171,9 +174,6 @@ void movement(void){
 			}
 		}
 		
-		
-		
-		
 		// collision w blocks
 		
 		temp_x = (Ball.X + 1) & 0xf0; // tiles are 16 px wide
@@ -205,9 +205,8 @@ void movement(void){
 	}
 }	
 
-
-
 void hit_block(void) {
+	//------------------------------------------------------------------------------------// Collision
 	score01 += 1;
 	adjust_score();
 	ball_direction = GOING_DOWN;
@@ -220,8 +219,6 @@ void hit_block(void) {
 	++address;
 	one_vram_buffer(0, address); // also the one to the right of it
 }
-
-
 
 void score_lives_draw(void){
 	temp1 = score10 + '0';
@@ -236,8 +233,6 @@ void score_lives_draw(void){
 	temp1 = lives01 + '0';
 	one_vram_buffer(temp1, NTADR_A(27,3));
 }
-
-
 
 void adjust_score(void){
 	if (score01 >= 10){

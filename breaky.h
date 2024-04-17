@@ -61,7 +61,8 @@ struct SpObject Ball = {0xff,0xff,5,5}; // balls x and x will be init later
 
 
 
-
+unsigned char i = 0; // Local Variable
+const unsigned char text[]="First Level"; // Starting text for the Game
 
 
 
