@@ -5,7 +5,7 @@
 CC65 = ../bin/cc65
 CA65 = ../bin/ca65
 LD65 = ../bin/ld65
-NAME = breaky
+NAME = Pads
 CFG = nrom_32k_vert.cfg
 
 
@@ -21,13 +21,13 @@ $(NAME).nes: $(NAME).o crt0.o $(CFG)
 	rm *.o
 	@echo $(NAME).nes created
 
-crt0.o: crt0.s breaky.chr
+crt0.o: crt0.s Alpha3.chr
 	$(CA65) crt0.s
 
 $(NAME).o: $(NAME).s
 	$(CA65) $(NAME).s -g
 
-$(NAME).s: $(NAME).c Sprites.h breaky.h BG/breaky_bg2.h CSV/c1.csv
+$(NAME).s: $(NAME).c Sprites.h
 	$(CC65) -Oirs $(NAME).c --add-source
 
 clean:

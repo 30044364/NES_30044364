@@ -286,4 +286,4 @@ sounds_data:
 
 .segment "CHARS"
 
-	.incbin "breaky.chr"
+	.incbin "Alpha3.chr"

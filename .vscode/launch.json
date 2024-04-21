@@ -8,11 +8,11 @@
             "type": "alchemy65",
             "request": "launch",
             "name": "Debug rom with mesen",
-            "romPath": "${workspaceFolder}/BUILD/breaky.nes",
-            "dbgPath": "${workspaceFolder}/BUILD/breaky.dbg",
+            "romPath": "${workspaceFolder}/BUILD/Pads.nes",
+            "dbgPath": "${workspaceFolder}/BUILD/Pads.dbg",
             "program": "/Program Files (x86)/MesenX/Mesen.exe",
             //"program": "${workspaceFolder}/../../../Mesen2/mesen2.exe",
-            "sourcePath": "${workspaceFolder}/breaky.c",
+            "sourcePath": "${workspaceFolder}/Pads.c",
             "stopOnEntry": false,
             "resetOnEntry": true
         }
